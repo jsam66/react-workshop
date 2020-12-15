@@ -1,8 +1,10 @@
 class ProductList extends React.Component {
     render() {
+        const products = Seed.products.sort((a,b) => b.votes -a.votes)
+        const productComponents = products.map(product => <Product key={product.id} id={product.id} title={product.title} description={product.description} url={product.url} votes={product.votes} submitterAvatarUrl={product.submitterAvatarUrl} productImageUrl={product.productImageUrl}/>)
         return <div className='ui unstackable items'>
-            <Product />
-        </div>
+            {productComponents}
+        </div> 
     }
 }
 
@@ -10,19 +12,25 @@ class Product extends React.Component {
     render() {
         return <div className='item'>
             <div className='image'>
-                <img src='images/products/image-aqua.png' />
+                <img src={this.props.productImageUrl} />
             </div>
             <div className='middle aligned content'>
+                <div className='header'>
+                    <a>
+                        <i className='large caret up icon' />
+                        {this.props.votes}
+                    </a>
+                </div>
                 <div className='description'>
-                    <a>Fort Knihgt</a>
-                    <p>Authentic renaissance actors, delivered in just two weeks.</p>
+                    <a href={this.props.url}>{this.props.title}</a>
+                    <p>{this.props.description}</p>
                 </div>
                 <div className='extra'>
                     <span>Submitted by: </span>
-                    <img className='ui avatar image' src='images/avatars/daniel.jpg'></img>
+                    <img className='ui avatar image' src={this.props.submitterAvatarUrl}></img>
                 </div>
             </div>
-        </div>
+        </div>  
     }
 }
 
