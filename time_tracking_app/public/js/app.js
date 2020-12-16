@@ -1,21 +1,17 @@
 class TimersDashboard extends React.Component {
   state = {
-    timers: [
-      {
-        title: 'Practice squat',
-        project: 'Gym Chores',
-        id: uuid.v4(),
-        elapsed: 5456099,
-        runningSince: Date.now(),
-        },
-        {
-        title: 'Bake squash',
-        project: 'Kitchen Chores',
-        id: uuid.v4(),
-        elapsed: 1273998,
-        runningSince: null,
-        },
-    ]
+    timers: []
+  }
+  componentDidMount() {
+    this.loadTimersFromServer()
+    setInterval(this.loadTimersFromServer(), 5000)
+  }
+  loadTimersFromServer = () => {
+    client.getTimers(serverTimers => {
+      this.setState({
+        timers: serverTimers
+      })
+    })
   }
   handleCreateFormSubmit = timer => {
     this.createTimer(timer)
@@ -37,6 +33,7 @@ class TimersDashboard extends React.Component {
     this.setState({
       timers: this.state.timers.concat(t)
     })
+    client.createTimer(t)
   }
   updateTimer = attr => {
     this.setState({
@@ -51,11 +48,13 @@ class TimersDashboard extends React.Component {
         }
       })
     })
+    client.updateTimer(attr)
   }
   deleteTimer = id => {
     this.setState({
       timers: this.state.timers.filter(timer => timer.id !== id)
   })
+  client.deleteTimer({id})
 }
 startTimer = id => {
   const now = Date.now()
@@ -70,6 +69,7 @@ startTimer = id => {
       }
     })
   })
+  client.startTimer({id, start: now})
 }
 stopTimer = id => {
   const now = Date.now()
@@ -86,6 +86,7 @@ stopTimer = id => {
       }
     })
   })
+  client.stopTimer({id, stop: now})
 }
   render() {
     return <div className='ui three column centered grid'>
