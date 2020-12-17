@@ -2,6 +2,7 @@
   "name": "client",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:3001/",
   "devDependencies": {
     "react-scripts": "1.1.1",
     "concurrently": "3.4.0"
