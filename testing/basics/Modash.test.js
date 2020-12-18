@@ -1,36 +1,30 @@
 import Modash from './Modash'
 
-function assertEqual(description, actual, expected) {
-  if (actual === expected) {
-    console.log(`[PASS] ${description}`)
-  } else {
-    console.log(`[FAIL] ${description}`)
-    console.log(`\tactual '${actual}'`)
-    console.log(`\texpected '${expected}'`)
-  }
-}
+describe('Modash', () => {
+  describe('`truncate()`', () => {
+    const string = 'there was one catch, and that was CATCH-22'
+    it(`should truncate a string`, () => {
+      expect(Modash.truncate(string, 19)).toEqual('there was one catch...')
+    })
+    it(`no-ops if string <= length`, () => {
+      expect(Modash.truncate(string, string.length)).toEqual(string)
+    })
+  })
+  describe('`capitalize()`', () => {
+    const string = 'there was one catch, and that was CATCH-22'
+    it('should capitalize string', () => {
+      expect(Modash.capitalize(string)).toEqual('There was one catch, and that was catch-22')
+    })
+  })
+  describe('`camelCase()`', () => {
+    it('should camelize string with spaces', () => {
+      const string = 'customer responded at'
+      expect(Modash.camelCase(string)).toEqual('customerRespondedAt')
+    })
+    it('should camelize string with underscore', () => {
+      const string = 'customer_responded_at'
+      expect(Modash.camelCase(string)).toEqual('customerRespondedAt')
+    })
+  })
 
-let actual, expected, string
-
-string = 'there was one catch, and that was CATCH-22'
-actual = Modash.truncate(string, 19)
-expected = 'there was one catch...'
-assertEqual(`truncate(): truncate a string`, actual, expected)
-
-actual = Modash.truncate(string, string.length)
-expected = string
-assertEqual(`truncate(): no-ops if <= length`, actual, expected)
-
-actual = Modash.capitalize(string)
-expected = 'There was one catch, and that was catch-22'
-assertEqual(`capitalize(): capitalize the string`, actual, expected)
-
-string = 'customer responded at'
-actual = Modash.camelCase(string)
-expected = 'customerRespondedAt'
-assertEqual(`camelCase(): strings with spaces`, actual, expected)
-
-string = 'customer_responded_at'
-actual = Modash.camelCase(string)
-expected = 'customerRespondedAt'
-assertEqual(`camelCase(): strings with underscore`, actual, expected)
+})
