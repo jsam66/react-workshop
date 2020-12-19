@@ -1,63 +1,5 @@
 import React from 'react';
-import createHistory from 'history/createBrowserHistory'
-import PropTypes from 'prop-types'
-
-const Route = ({ path, component }, { location }) => {
-  const pathname = location.pathname
-  if (pathname === path) {
-    return React.createElement(component)
-  } else {
-    return null
-  }
-}
-
-Route.contextTypes = {
-  location: PropTypes.object
-}
-
-const Link = ({ to, children }, { history }) => <a href={to} onClick={e => {
-  e.preventDefault()
-  history.push(to)
-}}>{children}</a>
-
-Link.contextTypes = {
-  history: PropTypes.object
-}
-
-class Redirect extends React.Component {
-  static contextTypes = {
-    history: PropTypes.object
-  }
-  componentDidMount() {
-    const history = this.context.history
-    const to = this.props.to
-    history.push(to)
-  }
-  render() {
-    return null
-  }
-}
-
-class Router extends React.Component {
-  static childContextTypes = {
-    location: PropTypes.object,
-    history: PropTypes.object
-  }
-  constructor(props) {
-    super(props)
-    this.history = createHistory()
-    this.history.listen(() => this.forceUpdate())
-  }
-  getChildContext() {
-    return {
-      location: window.location,
-      history: this.history
-    }
-  }
-  render() {
-    return this.props.children
-  }
-}
+import { BrowserRouter as Router, Route, Link, Redirect, Switch } from 'react-router-dom'
 
 const App = props => {
   return (
@@ -89,9 +31,19 @@ const App = props => {
 
         <hr />
 
-        <Route path='/atlantic' component={Atlantic} />
-        <Route path='/pacific' component={Pacific} />
-        <Route path='/black-sea' component={BlackSea} />
+        <Switch>
+          <Route path='/' render={() => <h3>welcome, select a body of saline water above</h3>} exact />
+          <Route path='/atlantic/ocean' render={() => <div>
+            <h3>Atlantic Ocean - Again!</h3>
+            <p>Also known as 'the pond'</p>
+          </div>} />
+          <Route path='/atlantic' component={Atlantic} />
+          <Route path='/pacific' component={Pacific} />
+          <Route path='/black-sea' component={BlackSea} />
+          <Route render={({ location }) => <div className='ui inverted red segment'>
+            <h3>error! no matches for <code>{location.pathname}</code></h3>
+          </div>} />
+        </Switch>
 
       </div>
     </Router>
