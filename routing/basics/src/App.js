@@ -1,8 +1,67 @@
 import React from 'react';
+import createHistory from 'history/createBrowserHistory'
+import PropTypes from 'prop-types'
 
-class App extends React.Component {
+const Route = ({ path, component }, { location }) => {
+  const pathname = location.pathname
+  if (pathname === path) {
+    return React.createElement(component)
+  } else {
+    return null
+  }
+}
+
+Route.contextTypes = {
+  location: PropTypes.object
+}
+
+const Link = ({ to, children }, { history }) => <a href={to} onClick={e => {
+  e.preventDefault()
+  history.push(to)
+}}>{children}</a>
+
+Link.contextTypes = {
+  history: PropTypes.object
+}
+
+class Redirect extends React.Component {
+  static contextTypes = {
+    history: PropTypes.object
+  }
+  componentDidMount() {
+    const history = this.context.history
+    const to = this.props.to
+    history.push(to)
+  }
   render() {
-    return (
+    return null
+  }
+}
+
+class Router extends React.Component {
+  static childContextTypes = {
+    location: PropTypes.object,
+    history: PropTypes.object
+  }
+  constructor(props) {
+    super(props)
+    this.history = createHistory()
+    this.history.listen(() => this.forceUpdate())
+  }
+  getChildContext() {
+    return {
+      location: window.location,
+      history: this.history
+    }
+  }
+  render() {
+    return this.props.children
+  }
+}
+
+const App = props => {
+  return (
+    <Router>
       <div
         className='ui text container'
       >
@@ -12,23 +71,31 @@ class App extends React.Component {
 
         <ul>
           <li>
-            <a href='/atlantic'>
+            <Link to='/atlantic'>
               <code>/atlantic</code>
-            </a>
+            </Link>
           </li>
           <li>
-            <a href='/pacific'>
+            <Link to='/pacific'>
               <code>/pacific</code>
-            </a>
+            </Link>
+          </li>
+          <li>
+            <Link to='/black-sea'>
+              <code>/black-sea</code>
+            </Link>
           </li>
         </ul>
 
         <hr />
 
-        {/* We'll insert the Route components here */}
+        <Route path='/atlantic' component={Atlantic} />
+        <Route path='/pacific' component={Pacific} />
+        <Route path='/black-sea' component={BlackSea} />
+
       </div>
-    );
-  }
+    </Router>
+  );
 }
 
 const Atlantic = () => (
@@ -50,5 +117,29 @@ const Pacific = () => (
     </p>
   </div>
 );
+
+class BlackSea extends React.Component {
+  state = {
+    counter: 3
+  }
+  componentDidMount() {
+    this.interval = setInterval(() => {
+      this.setState(prevState => ({
+        counter: prevState.counter - 1
+      }))
+    }, 1000)
+  }
+  componentWillUnmount() {
+    clearInterval(this.interval)
+  }
+  render() {
+    return <div>
+      <h3>Black sea</h3>
+      <p>Nothing to sea [sic] here ....</p>
+      <p>Redirecting in {this.state.counter}...</p>
+      {this.state.counter < 1 ? <Redirect to='/' /> : null}
+    </div>
+  }
+}
 
 export default App;
