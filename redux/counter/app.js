@@ -9,19 +9,28 @@ function reducer(state, action) {
   }
 }
 
-const incrementAction = { type: 'INCREMENT', amount: 7 }
+function createStore(reducer) {
+  let state = 0
+  const getState = () => state
+  const dispatch = action => {
+    state = reducer(state, action)
+  }
+  return {
+    getState,
+    dispatch
+  }
+}
 
-console.log(reducer(0, incrementAction)) // -> 1
-console.log(reducer(1, incrementAction)) // -> 2
-console.log(reducer(5, incrementAction)) // -> 6
+const store = createStore(reducer)
 
-const unknownAction = { type: 'UNKNOWN' }
+const incrementAction = { type: 'INCREMENT', amount: 3 }
+store.dispatch(incrementAction)
+console.log(store.getState())
 
-console.log(reducer(5, unknownAction)) // -> 5
-console.log(reducer(8, unknownAction)) // -> 8
+store.dispatch(incrementAction)
+console.log(store.getState())
 
-const decrementAction = { type: 'DECREMENT', amount: 7 }
+const descrementAction = { type: 'DECREMENT', amount: 4 }
 
-console.log(reducer(0, decrementAction)) // -> -1
-console.log(reducer(1, decrementAction)) // -> 0
-console.log(reducer(5, decrementAction)) // -> 4
+store.dispatch(descrementAction)
+console.log(store.getState())
