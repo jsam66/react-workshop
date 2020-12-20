@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import VerticalMenu from './VerticalMenu'
+import { Route } from 'react-router-dom'
 
 import Album from './Album';
 import { client } from '../Client';
@@ -29,7 +31,7 @@ class AlbumsContainer extends Component {
           fetched: true,
           albums: albums,
         })
-       ));
+      ));
   };
 
   render() {
@@ -38,25 +40,20 @@ class AlbumsContainer extends Component {
         <div className='ui active centered inline loader' />
       );
     } else {
+      const matchPath = this.props.match.path
       return (
         <div className='ui two column divided grid'>
           <div
             className='ui six wide column'
             style={{ maxWidth: 250 }}
           >
-            {/* VerticalMenu will go here */}
+            <VerticalMenu albums={this.state.albums} aPathname={matchPath} />
           </div>
           <div className='ui ten wide column'>
-            {
-              this.state.albums.map((a) => (
-                <div
-                  className='row'
-                  key={a.id}
-                >
-                  <Album album={a} />
-                </div>
-              ))
-            }
+            <Route path={`${matchPath}/:aId`} render={({ match }) => {
+              const album = this.state.albums.find(a => a.id === match.params.aId)
+              return <Album album={album} aPathname={matchPath} />
+            }} />
           </div>
         </div>
       );
