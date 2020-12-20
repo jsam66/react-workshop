@@ -1,5 +1,7 @@
 import React from 'react';
 import { Route, Redirect } from 'react-router-dom'
+import Login from './Login'
+import Logout from './Logout'
 
 import TopBar from './TopBar';
 import AlbumsContainer from './AlbumsContainer';
@@ -13,6 +15,8 @@ const App = () => (
     <div className='row'>
       <Route exact path='/' render={() => <Redirect to='/albums' />} />
       <Route path='/albums' component={AlbumsContainer} />
+      <Route path='/login' component={Login} />
+      <Route path='/logout' component={Logout} />
     </div>
   </div>
 );
