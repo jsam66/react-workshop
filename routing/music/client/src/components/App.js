@@ -1,7 +1,8 @@
 import React from 'react';
-import { Route, Redirect } from 'react-router-dom'
+import { Route, Redirect, Switch } from 'react-router-dom'
 import Login from './Login'
 import Logout from './Logout'
+import PrivateRoute from './PrivateRoute'
 
 import TopBar from './TopBar';
 import AlbumsContainer from './AlbumsContainer';
@@ -13,10 +14,12 @@ const App = () => (
     <TopBar />
     <div className='spacer row' />
     <div className='row'>
-      <Route exact path='/' render={() => <Redirect to='/albums' />} />
-      <Route path='/albums' component={AlbumsContainer} />
-      <Route path='/login' component={Login} />
-      <Route path='/logout' component={Logout} />
+      <Switch>
+        <Route exact path='/' render={() => <Redirect to='/albums' />} />
+        <PrivateRoute path='/albums' component={AlbumsContainer} />
+        <Route path='/login' component={Login} />
+        <Route path='/logout' component={Logout} />
+      </Switch>
     </div>
   </div>
 );
