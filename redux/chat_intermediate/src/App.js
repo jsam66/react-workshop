@@ -81,46 +81,36 @@ function messageReducer(state = [], action) {
 
 const store = createStore(reducer);
 
-class App extends React.Component {
-  componentDidMount() {
-    store.subscribe(() => this.forceUpdate());
-  }
-
-  render() {
-    const state = store.getState()
-    const activeThreadId = state.activeThreadId
-    const threads = state.threads
-    const activeThread = threads.find(t => t.id === activeThreadId)
-    const tabs = threads.map(t => ({
-      title: t.title,
-      active: t.id === activeThread.id,
-      id: t.id
-    }))
-    return (
-      <div className='ui segment'>
-        <ThreadTabs tabs={tabs} />
-        <Thread thread={activeThread} />
-      </div>
-    );
-  }
-}
+const App = () => <div className='ui segment'>
+  <ThreadTabs />
+  <ThreadDisplay />
+</div>
 
 class ThreadTabs extends React.Component {
-  handleClick = (id) => {
-    store.dispatch({
-      type: 'OPEN_THREAD',
-      id: id
-    })
+  componentDidMount() {
+    store.subscribe(() => this.forceUpdate())
   }
   render() {
-    const tabs = this.props.tabs.map((t, i) => <div key={i} className={t.active ? 'active item' : 'item'} onClick={() => this.handleClick(t.id)}>{t.title}</div>)
-    return <div className='ui top attached tabular menu'>
-      {tabs}
-    </div>
+    const state = store.getState()
+    const tabs = state.threads.map(t => ({
+      title: t.title,
+      id: t.id,
+      active: t.id === state.activeThreadId
+    }))
+    return <Tabs tabs={tabs} onClick={id => store.dispatch({
+      type: 'OPEN_THREAD',
+      id: id
+    })} />
   }
 }
 
-class MessageInput extends React.Component {
+const Tabs = props => <div className='ui top attached tabular menu'>
+  {
+    props.tabs.map((t, i) => <div className={t.active ? 'active item' : 'item'} key={i} onClick={() => props.onClick(t.id)}>{t.title}</div>)
+  }
+</div>
+
+class TextFieldSubmit extends React.Component {
   state = {
     value: '',
   };
@@ -132,11 +122,7 @@ class MessageInput extends React.Component {
   };
 
   handleSubmit = () => {
-    store.dispatch({
-      type: 'ADD_MESSAGE',
-      text: this.state.value,
-      threadId: this.props.threadId
-    });
+    this.props.onSubmit(this.state.value)
     this.setState({
       value: '',
     });
@@ -162,7 +148,10 @@ class MessageInput extends React.Component {
   }
 }
 
-class Thread extends React.Component {
+class ThreadDisplay extends React.Component {
+  componentDidMount() {
+    store.subscribe(() => this.forceUpdate())
+  }
   handleClick = (id) => {
     store.dispatch({
       type: 'DELETE_MESSAGE',
@@ -171,25 +160,30 @@ class Thread extends React.Component {
   };
 
   render() {
-    const messages = this.props.thread.messages.map(m => (
-      <div
-        className='comment'
-        key={m.id}
-        onClick={() => this.handleClick(m.id)}
-      >
-        {m.text}
-        <span className='metadata'>@{m.timestamp}</span>
-      </div>
-    ));
-    return (
-      <div className='ui center aligned basic segment'>
-        <div className='ui comments'>
-          {messages}
-        </div>
-        <MessageInput threadId={this.props.thread.id} />
-      </div>
-    );
+    const state = store.getState()
+    const activeThreadId = state.activeThreadId
+    const activeThread = state.threads.find(t => t.id === activeThreadId)
+    return <Thread thread={activeThread} onMessageClick={id => store.dispatch({
+      type: 'DELETE_MESSAGE',
+      id: id
+    })} onMessageSubmit={text => store.dispatch({
+      type: 'ADD_MESSAGE',
+      text: text,
+      threadId: activeThreadId
+    })} />
+
   }
 }
+
+const Thread = props => <div className='ui center aligned basic segment'>
+  <MessageList messages={props.thread.messages} onClick={props.onMessageClick} />
+  <TextFieldSubmit onSubmit={props.onMessageSubmit} />
+</div>
+
+const MessageList = props => <div className='ui comments'>
+  {
+    props.messages.map((m, i) => <div key={i} className='comment' onClick={() => props.onClick(m.id)}><div className='text'></div>{m.text} <span className='metadata'>{m.timestamp}</span></div>)
+  }
+</div>
 
 export default App;
