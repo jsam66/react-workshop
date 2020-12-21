@@ -3,45 +3,70 @@ import { createStore } from 'redux'
 import uuid from 'uuid'
 
 function reducer(state, action) {
-  if (action.type === 'ADD_MESSAGE') {
-    const nMessage = {
-      text: action.text,
-      timestamp: Date.now(),
-      id: uuid.v4()
+  return {
+    activeThreadId: activeThreadIdReducer(state.activeThreadId, action),
+    threads: threadReducer(state.threads, action)
+  }
+}
+
+function activeThreadIdReducer(state, action) {
+  if (action.type === 'OPEN_THREAD') {
+    return action.id
+  } else {
+    return state
+  }
+}
+
+
+function findThreadIndex(threads, action) {
+  switch (action.type) {
+    case 'ADD_MESSAGE': {
+      return threads.findIndex(t => t.id === action.threadId)
     }
-    const threadIndex = state.threads.findIndex(t => t.id === action.threadId)
-    const oldThread = state.threads[threadIndex]
-    const newThread = Object.assign({}, oldThread, {
-      messages: oldThread.messages.concat(nMessage)
-    })
-    return {
-      ...state,
-      threads: [
-        ...state.threads.slice(0, threadIndex), newThread, ...state.threads.slice(threadIndex + 1, state.threads.length)
-      ]
-    }
-  } else if (action.type === 'DELETE_MESSAGE') {
-    const threadIndex = state.threads.findIndex(t => t.messages.find(m => m.id === action.id))
-    const oldThread = state.threads[threadIndex]
-    const newThread = Object.assign({}, oldThread, {
-      messages: oldThread.messages.filter(m => m.id !== action.id)
-    })
-    return {
-      ...state,
-      threads: [
-        ...state.threads.slice(0, threadIndex),
-        newThread,
-        ...state.threads.slice(threadIndex + 1, state.threads.length)
-      ]
-    };
-  } else if (action.type === 'OPEN_THREAD') {
-    return {
-      ...state,
-      activeThreadId: action.id
+    case 'DELETE_MESSAGE': {
+      return threads.findIndex(t => t.messages.find(m => m.id === action.id))
     }
   }
-  else {
-    return state;
+}
+
+
+function threadReducer(state, action) {
+  switch (action.type) {
+    case 'ADD_MESSAGE':
+    case 'DELETE_MESSAGE': {
+      const threadIndex = findThreadIndex(state, action)
+      const oldThread = state[threadIndex]
+      const newThread = Object.assign({}, oldThread, {
+        messages: messageReducer(oldThread.messages, action)
+      })
+      return [
+        ...state.slice(0, threadIndex),
+        newThread,
+        ...state.slice(threadIndex + 1, state.length)
+      ]
+    }
+    default: {
+      return state;
+    }
+  }
+}
+
+function messageReducer(state, action) {
+  switch (action.type) {
+    case 'ADD_MESSAGE': {
+      const nMessage = {
+        text: action.text,
+        timestamp: Date.now(),
+        id: uuid.v4()
+      }
+      return state.concat(nMessage)
+    }
+    case 'DELETE_MESSAGE': {
+      return state.filter(m => m.id !== action.id)
+    }
+    default: {
+      return state
+    }
   }
 }
 
